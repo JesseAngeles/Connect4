@@ -7,6 +7,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 class GraphicInterface extends JFrame {
@@ -23,7 +24,7 @@ class GraphicInterface extends JFrame {
     private final ImageIcon bluePlayer = new ImageIcon("assets/bluePlayer.png");
     private final ImageIcon redPlayer = new ImageIcon("assets/redPlayer.png");
 
-    private Object[][] matrix;
+    private Matrix matrix;
 
     public GraphicInterface() {
         super("Busqueda adversaria");
@@ -33,7 +34,7 @@ class GraphicInterface extends JFrame {
         setLocationRelativeTo(null);
         setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
 
-        this.matrix = new Object[iSize][jSize];
+        this.matrix = new Matrix(iSize, jSize);
         add(initboardGridPanel());
     }
 
@@ -60,7 +61,7 @@ class GraphicInterface extends JFrame {
 
             boardGrid.add(button);
 
-            this.matrix[0][j] = button;
+            this.matrix.setJButton(j, button);
             System.out.print("(0," + j + ") ");
         }
         System.out.println("");
@@ -73,7 +74,7 @@ class GraphicInterface extends JFrame {
                 label.setIcon(new ImageIcon(imageDefault));
                 boardGrid.add(label);
 
-                this.matrix[i][j] = label;
+                this.matrix.setJLabel(i, j, label);
                 System.out.print("(" + i + ',' + j + ") ");
             }
             System.out.println("");
@@ -91,11 +92,11 @@ class GraphicInterface extends JFrame {
                     0 -> Empty
                     1 -> Blue
                    -1 -> Red
-    */
+     */
     public void updateBoard(int i, int j, int value) {
         Image newImage;
         switch (value) {
-            case 0:         
+            case 0:
                 newImage = iconEmpty.getImage().getScaledInstance(IMG_SIZE, IMG_SIZE, Image.SCALE_SMOOTH);
                 break;
             case 1:
@@ -104,13 +105,30 @@ class GraphicInterface extends JFrame {
             case -1:
                 newImage = redPlayer.getImage().getScaledInstance(IMG_SIZE, IMG_SIZE, Image.SCALE_SMOOTH);
                 break;
-            default: 
+            default:
                 throw new AssertionError();
         }
-        
-        
-        this.matrix[i][j].setIcon(new ImageIcon(newImage));
+
+        if (i == 0) {       // Se modifica un boton
+            this.matrix.getButtonByIndex(j).setIcon(new ImageIcon(newImage));
+        } else {            // Se modifica un label
+            this.matrix.getLabelByIndex(i, j).setIcon(new ImageIcon(newImage));
+        }
     }
-    
-   
+
+    /*
+    * @param winner Numero de ganador
+                    1 -> Blue
+                   -1 -> Red
+     */
+    public void winMessage(int winner) {
+        String message = "¡Gano el jugador ";
+        if (winner == 0) {
+            message = message.concat("Azul!");
+        } else {
+            message = message.concat("Rojo!");
+        }
+        JOptionPane.showMessageDialog(this, message);
+    }
+
 }
