@@ -13,19 +13,23 @@ import javax.swing.JPanel;
 class GraphicInterface extends JFrame {
 
     private final int IMG_SIZE = 64;
-    private final int WINDOW_WIDTH = 600;
-    private final int WINDOW_HEIGHT = 600;
+    private final int WINDOW_WIDTH = 470;
+    private final int WINDOW_HEIGHT = 420;
 
     private final int iSize = 6;
     private final int jSize = 7;
 
+    private int TMP_flag;
+    
     // Cambiar ruta al modificar versiones
     private final ImageIcon iconEmpty = new ImageIcon("assets/empty.png");
     private final ImageIcon bluePlayer = new ImageIcon("assets/bluePlayer.png");
     private final ImageIcon redPlayer = new ImageIcon("assets/redPlayer.png");
 
-    private Matrix matrix;
+    private final Matrix matrix;
 
+    private final BoardController boardController;
+    
     public GraphicInterface() {
         super("Busqueda adversaria");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -36,6 +40,11 @@ class GraphicInterface extends JFrame {
 
         this.matrix = new Matrix(iSize, jSize);
         add(initboardGridPanel());
+        
+        this.boardController = new BoardController(iSize, jSize);
+        
+        /*TEMP*/
+        TMP_flag = 1;
     }
 
     private JPanel initboardGridPanel() {
@@ -47,6 +56,8 @@ class GraphicInterface extends JFrame {
 
         // Botones superiores
         for (int j = 0; j < this.jSize; j++) {
+            int jPos = j;
+            
             JButton button = new JButton();
 
             button.setIcon(new ImageIcon(imageDefault));
@@ -56,7 +67,18 @@ class GraphicInterface extends JFrame {
 
             // Controlador de juego
             button.addActionListener((e) -> {
-
+                this.boardController.setPiece(jPos, TMP_flag);
+                if(TMP_flag == 1){
+                    TMP_flag = -1; 
+                } else {
+                     TMP_flag = 1;
+                }
+                
+                this.boardController.printBoard();
+                System.out.println("win: " + this.boardController.winVerification());
+                if (this.boardController.winVerification() != 0) {
+                    this.boardController.resetBoard();
+                }
             });
 
             boardGrid.add(button);

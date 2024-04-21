@@ -5,66 +5,90 @@ import java.util.Set;
 
 public class BoardController {
 
+    private int i;
+    private int j;
     private int[][] board;
 
     public BoardController(int i, int j) {
+        this.i = i;
+        this.j = j;
         this.board = new int[i][j];
+
     }
 
     public void resetBoard() {
-        for (int[] row : board) {
-            for (int pos : row) {
-                pos = 0;
-            }
-        }
+        this.board = new int[this.i][this.j];
     }
 
-    @SuppressWarnings("empty-statement")
     public int setPiece(int j, int player) {
         if (board[0][j] == 0) {         // No hay pieza en el tope
-            int i = 0;
-            while (board[++i][j] == 0);
-            board[i - 1][j] = player;
-            return i;
+            System.out.println("this.i: " + this.i);
+            int pos = 0;
+            for (int i = 0; i < this.i; i++) {
+                if (board[i][j] != 0) {
+                    break;
+                }
+                pos++;
+            }
+
+            System.out.println("pos: " + pos);
+            board[pos - 1][j] = player;
+            System.out.println("4");
+            return pos;
         } else {                        // ERROR: hay pieza en el borde
             return -1;
         }
     }
 
-    @SuppressWarnings("empty-statement")
     public int winVerification() {
-        int player = 0;
-        int size;
-        for (int i = 0; i < board.length; i++) {
-            for (int j = 0; j < board[i].length; j++) {
+        // Recorremos todas las casillas
+        for (int iPos = 0; iPos < board.length; iPos++) {
+            for (int jPos = 0; jPos < board[iPos].length; jPos++) {
 
-                int value = board[i][j];
-
+                int value = board[iPos][jPos]; 
+                
+                // Si no esta vacia se buscan similitudes en sus vecinos        
                 if (value != 0) {
-                    size = 0;
-                    while (board[i][j + ++size] == value) {
-                        if (size == 3) {
+                    //Right Validation
+                    for (int count = 1; count < 4 && jPos + count < this.j; count++) {
+                        if (board[iPos][jPos + count] != value) {
+                            break;
+                        }
+                        if (count == 3) {
                             return value;
                         }
                     }
-                    
-                    size = 0;
-                    while (board[i + ++size][j] == value) {
-                        if (size == 3) {
+
+                    //Left Down Validation
+                    for (int count = 1; count < 4 && iPos + count < this.i && jPos - count >= 0; count++) {
+                        if (board[iPos + count][jPos - count] != value) {
+                            break;
+                        }
+                        if (count == 3) {
                             return value;
                         }
                     }
-                    
-                    size = 1;
-                    while (board[i + size][j + size] == value) {                        
-                        if (size == 3) {
+
+                    //Down Validation
+                    for (int count = 1; count < 4 && iPos + count < this.i; count++) {
+                        if (board[iPos + count][jPos] != value) {
+                            break;
+                        }
+                        if (count == 3) {
                             return value;
                         }
-                        size++;
+                    }
+
+                    //Righ Down Validation 
+                    for (int count = 1; count < 4 && iPos + count < this.i && jPos + count < this.j; count++) {
+                        if (board[iPos + count][jPos + count] != value) {
+                            break;
+                        }
+                        if (count == 3) {
+                            return value;
+                        }
                     }
                 }
-                
-                
             }
         }
 
@@ -72,12 +96,13 @@ public class BoardController {
     }
 
     public void printBoard() {
-        System.out.println("Tablero: ");
-        for (int i = 0; i < board.length; i++) {
-            for (int j = 0; j < board[i].length; j++) {
-                System.out.print("" + board[i][j]);
-            }
-            System.out.println("");
+    System.out.println("Tablero:");
+    for (int i = 0; i < board.length; i++) {
+        for (int j = 0; j < board[i].length; j++) {
+            System.out.print(String.format("%2d ", board[i][j]));
         }
+        System.out.println(); 
     }
+}
+
 }
