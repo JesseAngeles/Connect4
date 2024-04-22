@@ -34,7 +34,7 @@ public class BoardController {
             System.out.println("pos: " + pos);
             board[pos - 1][j] = player;
             System.out.println("4");
-            return pos;
+            return pos - 1;
         } else {                        // ERROR: hay pieza en el borde
             return -1;
         }

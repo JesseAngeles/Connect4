@@ -20,7 +20,7 @@ class GraphicInterface extends JFrame {
     private final int jSize = 7;
 
     private int TMP_flag;
-    
+
     // Cambiar ruta al modificar versiones
     private final ImageIcon iconEmpty = new ImageIcon("assets/empty.png");
     private final ImageIcon bluePlayer = new ImageIcon("assets/bluePlayer.png");
@@ -28,8 +28,9 @@ class GraphicInterface extends JFrame {
 
     private final Matrix matrix;
 
+    private final GameController gameController;
     private final BoardController boardController;
-    
+
     public GraphicInterface() {
         super("Busqueda adversaria");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -40,9 +41,10 @@ class GraphicInterface extends JFrame {
 
         this.matrix = new Matrix(iSize, jSize);
         add(initboardGridPanel());
-        
+
+        this.gameController = new GameController(iSize, jSize, this);
         this.boardController = new BoardController(iSize, jSize);
-        
+
         /*TEMP*/
         TMP_flag = 1;
     }
@@ -57,7 +59,7 @@ class GraphicInterface extends JFrame {
         // Botones superiores
         for (int j = 0; j < this.jSize; j++) {
             int jPos = j;
-            
+
             JButton button = new JButton();
 
             button.setIcon(new ImageIcon(imageDefault));
@@ -67,18 +69,7 @@ class GraphicInterface extends JFrame {
 
             // Controlador de juego
             button.addActionListener((e) -> {
-                this.boardController.setPiece(jPos, TMP_flag);
-                if(TMP_flag == 1){
-                    TMP_flag = -1; 
-                } else {
-                     TMP_flag = 1;
-                }
-                
-                this.boardController.printBoard();
-                System.out.println("win: " + this.boardController.winVerification());
-                if (this.boardController.winVerification() != 0) {
-                    this.boardController.resetBoard();
-                }
+                this.gameController.move(jPos);
             });
 
             boardGrid.add(button);
@@ -138,6 +129,20 @@ class GraphicInterface extends JFrame {
         }
     }
 
+    public void cleanBoard() {
+        Image newImage = iconEmpty.getImage().getScaledInstance(IMG_SIZE, IMG_SIZE, Image.SCALE_SMOOTH);
+        
+        for (int j = 0; j < this.jSize; j++) {
+            this.matrix.getButtonByIndex(j).setIcon(new ImageIcon(newImage));
+        }
+        
+        for (int i = 1; i < this.iSize; i++) {
+            for (int j = 0; j < this.jSize; j++) {
+                this.matrix.getLabelByIndex(i, j).setIcon(new ImageIcon(newImage));
+            }
+        }
+    }
+
     /*
     * @param winner Numero de ganador
                     1 -> Blue
@@ -145,10 +150,10 @@ class GraphicInterface extends JFrame {
      */
     public void winMessage(int winner) {
         String message = "¡Gano el jugador ";
-        if (winner == 0) {
-            message = message.concat("Azul!");
-        } else {
+        if (winner == 1) {
             message = message.concat("Rojo!");
+        } else {
+            message = message.concat("Azul!");
         }
         JOptionPane.showMessageDialog(this, message);
     }
