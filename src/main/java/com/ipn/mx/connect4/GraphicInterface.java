@@ -7,6 +7,8 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
@@ -40,6 +42,7 @@ class GraphicInterface extends JFrame {
         setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
 
         this.matrix = new Matrix(iSize, jSize);
+        setJMenuBar(initMenuBar());
         add(initboardGridPanel());
 
         this.gameController = new GameController(iSize, jSize, this);
@@ -49,6 +52,20 @@ class GraphicInterface extends JFrame {
         TMP_flag = 1;
     }
 
+    private JMenuBar initMenuBar() {
+        JMenuBar menuBar = new JMenuBar();
+        
+        JMenuItem botStart = new JMenuItem("Bot Start");
+        
+        botStart.addActionListener((e) -> {
+            this.gameController.setTurn(-1);
+        });
+        
+        menuBar.add(botStart);
+        
+        return menuBar;
+    }
+    
     private JPanel initboardGridPanel() {
         JPanel boardGrid = new JPanel();
 

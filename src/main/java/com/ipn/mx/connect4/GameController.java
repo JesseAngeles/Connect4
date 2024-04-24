@@ -3,6 +3,10 @@ package com.ipn.mx.connect4;
 public class GameController {
 
     private int turn;
+    /*
+        1 -> player
+       -1 -> bot
+     */
 
     private final GraphicInterface graphicController;
     private final BoardController boardController;
@@ -15,22 +19,34 @@ public class GameController {
     }
 
     public void move(int jPos) {
-        int iPos = this.boardController.setPiece(jPos, turn);
-        if (iPos != -1) {   // La columna esta vacia
-            this.graphicController.updateBoard(iPos, jPos, turn);
-
-            turn = -turn;
-
-            if (boardController.winVerification() != 0) {
-                this.boardController.resetBoard();
-                this.graphicController.cleanBoard();
-                this.graphicController.winMessage(turn);
+        int iPos = this.boardController.setPiece(jPos, this.turn);
+        if (iPos != -1) {
+            if (this.turn == 1) {
+                // Movimiento del jugador
+                this.graphicController.updateBoard(iPos, jPos, this.turn);
+                if (boardController.winVerification() == 1) {
+                    this.boardController.resetBoard();
+                    this.graphicController.cleanBoard();
+                    this.graphicController.winMessage(this.turn);
+                    return;
+                }
+                this.turn = -1;
+            }
+            if (this.turn == -1) {
+                // Movimiento del bot
+                // Escoge Minimax
+                
+                System.out.println("");
+                
                 this.turn = 1;
             }
 
-            this.boardController.printBoard();
-        } else {        // La columna esta llena
+        } else {
             System.out.println("Column fill");
         }
+    }
+
+    public void setTurn(int turn) {
+        this.turn = turn;
     }
 }
