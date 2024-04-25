@@ -68,9 +68,9 @@ class GraphicInterface extends JFrame {
             boardGrid.add(button);
 
             this.matrix.setJButton(j, button);
-            System.out.print("(0," + j + ") ");
+            //System.out.print("(0," + j + ") ");
         }
-        System.out.println("");
+        //System.out.println("");
 
         // Tablero inferior
         for (int i = 1; i < this.iSize; i++) {
@@ -81,9 +81,9 @@ class GraphicInterface extends JFrame {
                 boardGrid.add(label);
 
                 this.matrix.setJLabel(i, j, label);
-                System.out.print("(" + i + ',' + j + ") ");
+                //System.out.print("(" + i + ',' + j + ") ");
             }
-            System.out.println("");
+            //System.out.println("");
         }
 
         boardGrid.setSize(new Dimension(IMG_SIZE * iSize, IMG_SIZE * jSize));

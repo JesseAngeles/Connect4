@@ -1,11 +1,11 @@
 package com.ipn.mx.connect4;
 
-import java.util.Random;
-
 public class BoardController {
 
     private final int iSize;
     private final int jSize;
+
+    private final int deep = 7;
 
     protected int heuristic;
 
@@ -30,39 +30,38 @@ public class BoardController {
     }
 
     private int getPosMaxHeuristic(BoardController board) {
-    if (board == null || board.children == null || !board.hasChildren(board)) {
-        return -1; // Retorna -1 para indicar que no hay elementos válidos
-    }
-
-    int posMax = -1;
-    int max = Integer.MIN_VALUE; // Usa el valor más bajo posible para inicializar
-    for (int i = 0; i < board.children.length; i++) {
-        if (board.children[i] != null && board.children[i].heuristic > max) {
-            max = board.children[i].heuristic;
-            posMax = i;
+        if (board == null || board.children == null || !board.hasChildren(board)) {
+            return -1; // Retorna -1 para indicar que no hay elementos válidos
         }
-    }
 
-    return posMax;
-}
+        int posMax = -1;
+        int max = Integer.MIN_VALUE; // Usa el valor más bajo posible para inicializar
+        for (int i = 0; i < board.children.length; i++) {
+            if (board.children[i] != null && board.children[i].heuristic > max) {
+                max = board.children[i].heuristic;
+                posMax = i;
+            }
+        }
+
+        return posMax;
+    }
 
     private int getPosMinHeuristic(BoardController board) {
-    if (board == null || board.children == null || !board.hasChildren(board)) {
-        return -1; // Retorna -1 para indicar que no hay elementos válidos
-    }
-
-    int posMin = -1;
-    int min = Integer.MAX_VALUE; // Usa el valor más alto posible para inicializar
-    for (int i = 0; i < board.children.length; i++) {
-        if (board.children[i] != null && board.children[i].heuristic < min) {
-            min = board.children[i].heuristic;
-            posMin = i;
+        if (board == null || board.children == null || !board.hasChildren(board)) {
+            return -1; // Retorna -1 para indicar que no hay elementos válidos
         }
+
+        int posMin = -1;
+        int min = Integer.MAX_VALUE; // Usa el valor más alto posible para inicializar
+        for (int i = 0; i < board.children.length; i++) {
+            if (board.children[i] != null && board.children[i].heuristic < min) {
+                min = board.children[i].heuristic;
+                posMin = i;
+            }
+        }
+
+        return posMin;
     }
-
-    return posMin;
-}
-
 
     public void resetBoard() {
         this.board = new int[this.iSize][this.jSize];
@@ -144,13 +143,12 @@ public class BoardController {
     }
 
     public int getNextPos() {
-        generateChildren(this, 1, 3);
+        generateChildren(this, -1, deep);
         return getPosMaxHeuristic(this);
     }
 
     private void generateChildren(BoardController father, int turn, int deep) {
         if (deep > 0) {
-            System.out.println("Deep: " + deep);
 
             for (int jPos = 0; jPos < this.jSize; jPos++) {
                 BoardController boardSon = new BoardController(iSize, jSize, father);
@@ -160,19 +158,27 @@ public class BoardController {
                     generateChildren(boardSon, -turn, deep - 1);
                     boardSon.heuristic = boardSon.getHeuristic();
                     if (hasChildren(boardSon)) {
-                        if (turn == 1) {                                    // Obtener minimo
-                            boardSon.heuristic = boardSon.children[getPosMinHeuristic(boardSon)].heuristic;
+                        if (turn == -1 && winVerification() == -1) {
+                            boardSon.heuristic = Integer.MIN_VALUE;
+                        } else if (turn == 1 && winVerification() == 1) {
+                            boardSon.heuristic = Integer.MAX_VALUE;
                         } else {
-                            boardSon.heuristic = boardSon.children[getPosMaxHeuristic(boardSon)].heuristic;
+                            if (turn == 1) {                                    // Obtener minimo
+                                boardSon.heuristic = boardSon.children[getPosMinHeuristic(boardSon)].heuristic;
+                            } else {
+                                boardSon.heuristic = boardSon.children[getPosMaxHeuristic(boardSon)].heuristic;
+                            }
                         }
                     }
+
                     father.children[jPos] = boardSon;
-                System.out.println("(" + iPos + "," + jPos + ") = " + boardSon.heuristic);
+                    //System.out.println("(" + iPos + "," + jPos + ") = " + boardSon.heuristic);
                 } else {
-                    System.out.println("Column Fill");
+                    //boardSon.heuristic = boardSon.getHeuristic();
+
                 }
             }
-            System.out.println("");
+            //System.out.println("");
         } else {
             father.children = null;
         }
@@ -193,6 +199,7 @@ public class BoardController {
 
     public int getHeuristic() {
         int value;
+        int globalCounter = 0;
         int counter = 0;
 
         int botCounter = 0;
@@ -201,6 +208,8 @@ public class BoardController {
         for (int i = iSize - 1; i >= 0; i--) {
             for (int j = 0; j < jSize; j++) {
 
+                globalCounter = 0;
+                counter = 0;
                 value = board[i][j];
 
                 //Right counter
@@ -209,10 +218,12 @@ public class BoardController {
                     if (board[i][jNew] == -value) {
                         counter = 0;        // Heuristica 0                      
                         break;
-                    } else if (board[i][jNew] == value) {
+                    } else {
                         counter++;
                     }
                 }
+                globalCounter += counter;
+                counter = 0;
 
                 //Right Up
                 for (int k = 1; k < 4 && i - 3 >= 0 && j + 3 < jSize; k++) {
@@ -221,10 +232,12 @@ public class BoardController {
                     if (board[iNew][jNew] == -value) {
                         counter = 0;        // Heuristica 0                      
                         break;
-                    } else if (board[iNew][jNew] == value) {
+                    } else {
                         counter++;
                     }
                 }
+                globalCounter += counter;
+                counter = 0;
 
                 //Up
                 for (int k = 1; k < 4 && i - 3 >= 0; k++) {
@@ -232,10 +245,12 @@ public class BoardController {
                     if (board[iNew][j] == -value) {
                         counter = 0;        // Heuristica 0                      
                         break;
-                    } else if (board[iNew][j] == value) {
+                    } else {
                         counter++;
                     }
                 }
+                globalCounter += counter;
+                counter = 0;
 
                 //Left Up
                 for (int k = 1; k < 4 && i - 3 >= 0 && j - 3 >= 0; k++) {
@@ -244,22 +259,77 @@ public class BoardController {
                     if (board[iNew][jNew] == -value) {
                         counter = 0;        // Heuristica 0                      
                         break;
-                    } else if (board[iNew][jNew] == value) {
+                    } else {
                         counter++;
                     }
                 }
+                globalCounter += counter;
+                counter = 0;
+                
+                //Left counter
+                for (int k = 1; k < 4 && j - 3 >= 0; k++) {
+                    int jNew = j - k;
+                    if (board[i][jNew] == -value) {
+                        counter = 0;        // Heuristica 0                      
+                        break;
+                    } else {
+                        counter++;
+                    }
+                }
+                globalCounter += counter;
+                counter = 0;
+                
+                //Left Down
+                for (int k = 1; k < 4 && i + 3 < iSize && j - 3 >= 0; k++) {
+                    int iNew = i + k;
+                    int jNew = j - k;
+                    if (board[iNew][jNew] == -value) {
+                        counter = 0;        // Heuristica 0                      
+                        break;
+                    } else {
+                        counter++;
+                    }
+                }
+                globalCounter += counter;
+                counter = 0;
 
+                //Down
+                for (int k = 1; k < 4 && i + 3 < iSize; k++) {
+                    int iNew = i + k;
+                    if (board[iNew][j] == -value) {
+                        counter = 0;        // Heuristica 0                      
+                        break;
+                    } else {
+                        counter++;
+                    }
+                }
+                globalCounter += counter;
+                counter = 0;
+                
+                //Right Down
+                for (int k = 1; k < 4 && i + 3 < iSize && j + 3 < jSize; k++) {
+                    int iNew = i + k;
+                    int jNew = j + k;
+                    if (board[iNew][jNew] == -value) {
+                        counter = 0;        // Heuristica 0                      
+                        break;
+                    } else {
+                        counter++;
+                    }
+                }
+                globalCounter += counter;
+                counter = 0;
+                
                 if (value == -1) {
-                    botCounter += value;
+                    botCounter = globalCounter;
                 } else {
-                    playerCounter += value;
+                    playerCounter += globalCounter;
                 }
 
             }
         }
-        Random random = new Random();
-        // Genera un número aleatorio entre -20 y 20
-        return random.nextInt(41) - 20;
+
+        return botCounter - playerCounter;
     }
 
     public void printBoard() {

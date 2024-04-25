@@ -23,10 +23,12 @@ public class GameController {
 
     private void botMove() {
         int jPos = board.getNextPos();
+        //System.out.println("jPos: " + jPos);
         int iPos = board.getIPos(jPos);
         if (iPos != -1) {
             movementValidation(iPos, jPos, -1);
         } else {
+            System.out.println("jPos: " + jPos);
             System.out.println("Bot has no moves left.");
         }
     }
@@ -34,7 +36,7 @@ public class GameController {
     public boolean movementValidation(int iPos, int jPos, int turn) {
         board.setPiece(iPos, jPos, turn);
         graphicController.updateBoard(iPos, jPos, turn);
-        board.printBoard();
+        //board.printBoard();
 
         if (board.winVerification() == turn) {
             graphicController.winMessage(turn);
