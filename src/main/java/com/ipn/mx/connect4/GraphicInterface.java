@@ -7,8 +7,6 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
@@ -21,8 +19,6 @@ class GraphicInterface extends JFrame {
     private final int iSize = 6;
     private final int jSize = 7;
 
-    private int TMP_flag;
-
     // Cambiar ruta al modificar versiones
     private final ImageIcon iconEmpty = new ImageIcon("assets/empty.png");
     private final ImageIcon bluePlayer = new ImageIcon("assets/bluePlayer.png");
@@ -31,8 +27,7 @@ class GraphicInterface extends JFrame {
     private final Matrix matrix;
 
     private final GameController gameController;
-    private final BoardController boardController;
-
+    
     public GraphicInterface() {
         super("Busqueda adversaria");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -42,28 +37,9 @@ class GraphicInterface extends JFrame {
         setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
 
         this.matrix = new Matrix(iSize, jSize);
-        setJMenuBar(initMenuBar());
         add(initboardGridPanel());
 
         this.gameController = new GameController(iSize, jSize, this);
-        this.boardController = new BoardController(iSize, jSize);
-
-        /*TEMP*/
-        TMP_flag = 1;
-    }
-
-    private JMenuBar initMenuBar() {
-        JMenuBar menuBar = new JMenuBar();
-        
-        JMenuItem botStart = new JMenuItem("Bot Start");
-        
-        botStart.addActionListener((e) -> {
-            this.gameController.setTurn(-1);
-        });
-        
-        menuBar.add(botStart);
-        
-        return menuBar;
     }
     
     private JPanel initboardGridPanel() {
@@ -86,7 +62,7 @@ class GraphicInterface extends JFrame {
 
             // Controlador de juego
             button.addActionListener((e) -> {
-                this.gameController.move(jPos);
+                this.gameController.playerMove(jPos);
             });
 
             boardGrid.add(button);
@@ -168,9 +144,9 @@ class GraphicInterface extends JFrame {
     public void winMessage(int winner) {
         String message = "¡Gano el jugador ";
         if (winner == 1) {
-            message = message.concat("Rojo!");
-        } else {
             message = message.concat("Azul!");
+        } else {
+            message = message.concat("Rojo!");
         }
         JOptionPane.showMessageDialog(this, message);
     }
