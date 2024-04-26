@@ -1,5 +1,7 @@
 package com.ipn.mx.connect4;
 
+import java.util.Collections;
+
 public class BoardController {
 
     private final int iSize;
@@ -143,30 +145,42 @@ public class BoardController {
     }
 
     public int getNextPos() {
-        generateChildren(this, -1, deep);
+        generateChildren(this, -1, deep, new int[]{Integer.MIN_VALUE, Integer.MAX_VALUE});
         return getPosMaxHeuristic(this);
     }
 
-    private void generateChildren(BoardController father, int turn, int deep) {
+    private void generateChildren(BoardController father, int turn, int deep, int[] pruning) {
         if (deep > 0) {
-
             for (int jPos = 0; jPos < this.jSize; jPos++) {
                 BoardController boardSon = new BoardController(iSize, jSize, father);
                 int iPos = boardSon.getIPos(jPos);
                 if (iPos != -1) {                                       // Se puede poner
                     boardSon.setPiece(iPos, jPos, turn);
-                    generateChildren(boardSon, -turn, deep - 1);
+                    generateChildren(boardSon, -turn, deep - 1, pruning);
                     boardSon.heuristic = boardSon.getHeuristic();
                     if (hasChildren(boardSon)) {
-                        if (turn == -1 && winVerification() == -1) {
-                            boardSon.heuristic = Integer.MIN_VALUE;
-                        } else if (turn == 1 && winVerification() == 1) {
-                            boardSon.heuristic = Integer.MAX_VALUE;
-                        } else {
-                            if (turn == 1) {                                    // Obtener minimo
+                        if (turn == -1) {
+                            if (winVerification() == -1) {
+                                boardSon.heuristic = Integer.MIN_VALUE;
+                            } else {
                                 boardSon.heuristic = boardSon.children[getPosMinHeuristic(boardSon)].heuristic;
+                            }
+
+                            pruning[1] = Math.min(pruning[1], boardSon.heuristic);
+                            if (pruning[0] >= pruning[1]) {
+                                continue;
+                            }
+
+                        } else {
+                            if (winVerification() == 1) {
+                                boardSon.heuristic = Integer.MAX_VALUE;
                             } else {
                                 boardSon.heuristic = boardSon.children[getPosMaxHeuristic(boardSon)].heuristic;
+                            }
+
+                            pruning[0] = Math.max(pruning[0], boardSon.heuristic);
+                            if (pruning[0] >= pruning[1]) {
+                                 break;
                             }
                         }
                     }
@@ -178,9 +192,8 @@ public class BoardController {
 
                 }
             }
-            //System.out.println("");
         } else {
-            father.children = null;
+            father.children = null;  // No se generan hijos si la profundidad es 0
         }
     }
 
@@ -218,6 +231,8 @@ public class BoardController {
                     if (board[i][jNew] == -value) {
                         counter = 0;        // Heuristica 0                      
                         break;
+                    } else if (board[i][jNew] == value) {
+                        counter += 2;
                     } else {
                         counter++;
                     }
@@ -232,6 +247,8 @@ public class BoardController {
                     if (board[iNew][jNew] == -value) {
                         counter = 0;        // Heuristica 0                      
                         break;
+                    } else if (board[iNew][jNew] == value) {
+                        counter += 2;
                     } else {
                         counter++;
                     }
@@ -245,6 +262,8 @@ public class BoardController {
                     if (board[iNew][j] == -value) {
                         counter = 0;        // Heuristica 0                      
                         break;
+                    } else if (board[iNew][j] == value) {
+                        counter += 2;
                     } else {
                         counter++;
                     }
@@ -259,26 +278,30 @@ public class BoardController {
                     if (board[iNew][jNew] == -value) {
                         counter = 0;        // Heuristica 0                      
                         break;
+                    } else if (board[iNew][jNew] == value) {
+                        counter += 2;
                     } else {
                         counter++;
                     }
                 }
                 globalCounter += counter;
                 counter = 0;
-                
+
                 //Left counter
                 for (int k = 1; k < 4 && j - 3 >= 0; k++) {
                     int jNew = j - k;
                     if (board[i][jNew] == -value) {
                         counter = 0;        // Heuristica 0                      
                         break;
+                    } else if (board[i][jNew] == value) {
+                        counter += 2;
                     } else {
                         counter++;
                     }
                 }
                 globalCounter += counter;
                 counter = 0;
-                
+
                 //Left Down
                 for (int k = 1; k < 4 && i + 3 < iSize && j - 3 >= 0; k++) {
                     int iNew = i + k;
@@ -286,6 +309,8 @@ public class BoardController {
                     if (board[iNew][jNew] == -value) {
                         counter = 0;        // Heuristica 0                      
                         break;
+                    } else if (board[iNew][jNew] == value) {
+                        counter += 2;
                     } else {
                         counter++;
                     }
@@ -299,13 +324,15 @@ public class BoardController {
                     if (board[iNew][j] == -value) {
                         counter = 0;        // Heuristica 0                      
                         break;
+                    } else if (board[iNew][j] == value) {
+                        counter += 2;
                     } else {
                         counter++;
                     }
                 }
                 globalCounter += counter;
                 counter = 0;
-                
+
                 //Right Down
                 for (int k = 1; k < 4 && i + 3 < iSize && j + 3 < jSize; k++) {
                     int iNew = i + k;
@@ -313,13 +340,15 @@ public class BoardController {
                     if (board[iNew][jNew] == -value) {
                         counter = 0;        // Heuristica 0                      
                         break;
+                    } else if (board[iNew][jNew] == value) {
+                        counter += 2;
                     } else {
                         counter++;
                     }
                 }
                 globalCounter += counter;
                 counter = 0;
-                
+
                 if (value == -1) {
                     botCounter = globalCounter;
                 } else {
